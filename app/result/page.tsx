@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Button } from "@/components/ui/button";
+import * as React from "react"
+import { Button } from "@/components/ui/button"
 import {
   Drawer,
   DrawerClose,
@@ -11,126 +11,186 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from "@/components/ui/drawer"
 
-const products = [
-  {
-    id: 1,
-    image: "https://via.placeholder.com/300x175",
-    title: "Product 1",
-    price: "200 DT",
-    website: "https://example.com/product1",
-    websiteName: "Mytek",
-  },
-  {
-    id: 2,
-    image: "https://via.placeholder.com/300x175",
-    title: "Product 2",
-    price: "150 DT",
-    website: "https://example.com/product2",
-    websiteName: "SBS",
-  },
-  {
-    id: 3,
-    image: "https://via.placeholder.com/300x175",
-    title: "Product 3",
-    price: "180 DT",
-    website: "https://example.com/product3",
-    websiteName: "Tunisianet",
-  },
-];
+import { useScrapper } from "@/hooks"
 
-const bestProduct = {
-  id: 4,
-  image: "https://via.placeholder.com/300x175",
-  title: "Best Product",
-  price: "140 DT",
-  website: "https://example.com/product4",
-  websiteName: "BestWeb",
-};
+import Loader from "@/components/loader"
 
 export default function Home() {
-  return (
+  const [search, setSearch] = React.useState<string>("")
+
+  const [isLoading, setIsLoading] = React.useState<boolean>(false)
+
+  const { data, getRes, bestProd } = useScrapper()
+
+  React.useEffect(() => {
+    const url = new URLSearchParams(window.location.search)
+    const searchQuery = url.get("search")
+    if (searchQuery) {
+      setSearch(searchQuery)
+    } else {
+      window.location.href = "/Home"
+    }
+  }, [])
+
+  React.useEffect(() => {
+    setIsLoading(true)
+    if (search) {
+      getRes(search).finally(() => {
+        setIsLoading(false)
+      })
+    }
+  }, [search])
+
+  return isLoading ? (
+    <>
+      <Loader />
+    </>
+  ) : (
     <div className="grid place-items-center min-h-screen bg-gray-50 p-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <div className="text-center space-y-6">
         <p className="text-lg sm:text-xl text-gray-600 max-w-2xl">
-          Here’s what we’ve found! Take a look at these products and their prices.
+          Here’s what we’ve found! Take a look at these products and their
+          prices. <strong>{search}</strong>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 ">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white shadow rounded-lg p-4 text-center space-y-4"
-          >
-            <img
-              src={product.image}
-              alt={product.title}
-              className="h-[175px] w-full rounded-lg object-cover"
-            />
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {product.title}
-              </h3>
-              <p className="text-md text-gray-600">{product.price}</p>
-              <a
-                href={product.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-600 hover:underline"
-              >
-                {product.websiteName}
-              </a>
+      <h3 className="text-center w-full text-2xl py-10">From Mytek</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+        {(data as any)?.mytek &&
+          (data as any)?.mytek.map((product: any, index: number) => (
+            <div
+              key={index}
+              className="bg-white shadow rounded-lg p-4 text-center space-y-4"
+            >
+              <img
+                src={product.Image}
+                alt={product.Name}
+                className="h-[175px] w-full rounded-lg object-cover"
+              />
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {product.Name}
+                </h3>
+                <p className="text-md text-gray-600">{product.Price}</p>
+                <a
+                  href={product.Link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 hover:underline"
+                >
+                  Visit
+                </a>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+      </div>
+
+      <h3 className="text-center w-full text-2xl py-10">From SBS INFO</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+        {(data as any)?.sbs &&
+          (data as any)?.sbs.map((product: any, index: number) => (
+            <div
+              key={index}
+              className="bg-white shadow rounded-lg p-4 text-center space-y-4"
+            >
+              <img
+                src={product.Image}
+                alt={product.Name}
+                className="h-[175px] w-full rounded-lg object-cover"
+              />
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {product.Name}
+                </h3>
+                <p className="text-md text-gray-600">{product.Price}</p>
+                <a
+                  href={product.Link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 hover:underline"
+                >
+                  Visit
+                </a>
+              </div>
+            </div>
+          ))}
+      </div>
+
+      <h3 className="text-center w-full text-2xl py-10">From Tunisianet</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+        {(data as any)?.tunisianet &&
+          (data as any)?.tunisianet.map((product: any, index: number) => (
+            <div
+              key={index}
+              className="bg-white shadow rounded-lg p-4 text-center space-y-4"
+            >
+              <img
+                src={product.Image}
+                alt={product.Name}
+                className="h-[175px] w-full rounded-lg object-cover"
+              />
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {product.Name}
+                </h3>
+                <p className="text-md text-gray-600">{product.Price}</p>
+                <a
+                  href={product.Link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 hover:underline"
+                >
+                  Visit
+                </a>
+              </div>
+            </div>
+          ))}
       </div>
       <div className="mt-10 flex justify-center items-center">
-  <Drawer>
-    <DrawerTrigger asChild>
-      <Button variant="outline">Best Price</Button>
-    </DrawerTrigger>
-    <DrawerContent>
-      <div className="mx-auto w-full max-w-sm ">
-        <DrawerHeader>
-          <DrawerTitle>Best Price Product</DrawerTitle>
-          <DrawerDescription>
-            Here is the product with the best price.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="p-4 pb-0 text-center space-y-3">
-          <img
-            src={bestProduct.image}
-            alt={bestProduct.title}
-            className="h-[175px] w-[300px] rounded-xl object-cover mx-auto"
-          />
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold">
-              {bestProduct.title}
-            </h3>
-            <p className="text-md text-gray-600">{bestProduct.price}</p>
-            <a
-              href={bestProduct.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              {bestProduct.websiteName}
-            </a>
-          </div>
-        </div>
-        <DrawerFooter>
-          <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
-          </DrawerClose>
-        </DrawerFooter>
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button variant="outline">Predicted Best Product</Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            {bestProd && (
+              <div className="mx-auto w-full max-w-sm">
+                <DrawerHeader>
+                  <DrawerTitle>Predicted Best Product</DrawerTitle>
+                  <DrawerDescription>
+                    We suggest this product for you with its best price!
+                  </DrawerDescription>
+                </DrawerHeader>
+                <div className="p-4 pb-0 text-center space-y-3">
+                  <img
+                    src={bestProd.Image}
+                    alt={bestProd.Name}
+                    className="h-[175px] w-[300px] rounded-xl object-cover mx-auto"
+                  />
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold">{bestProd.Name}</h3>
+                    <p className="text-md text-gray-600">{bestProd.Price} DT</p>
+                    <a
+                      href={bestProd.Link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      Visit Link
+                    </a>
+                  </div>
+                </div>
+                <DrawerFooter>
+                  <DrawerClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </div>
+            )}
+          </DrawerContent>
+        </Drawer>
       </div>
-    </DrawerContent>
-  </Drawer>
-</div>
-
-
     </div>
-  );
+  )
 }
